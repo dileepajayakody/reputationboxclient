@@ -1,0 +1,34 @@
+{
+    "reputation": [
+        {
+            "id": "123466",
+            "score": 0.85,
+            "features": {
+                "topic-features": [
+                    {
+                        "item": "research",
+                        "score": 0.85
+                    },
+                    {
+                        "item": "text",
+                        "score": 0.65
+                    },
+                    {
+                        "item": "machine-learning",
+                        "score": 0.6
+                    }
+                ],
+                "people-features": [
+                    {
+                        "item": "gihan@uom.lk",
+                        "score": 0.9
+                    },
+                    {
+                        "item": "research@nic.lk",
+                        "score": 0.6
+                    }
+                ]
+            }
+        }
+    ]
+}

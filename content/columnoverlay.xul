@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<overlay id="sample"
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <tree id="threadTree">
+    <treecols id="threadCols">
+    	<splitter class="tree-splitter" />
+    	<treecol id="colContentRep" persist="hidden ordinal width" 
+           currentView="unthreaded" flex="2"
+           label="Content Score" tooltiptext="Click to sort by Content Reputation" />
+    	<splitter class="tree-splitter" />
+    	<treecol id="colPeopleRep" persist="hidden ordinal width" 
+           currentView="unthreaded" flex="2"
+           label="People Score" tooltiptext="Click to sort by People Reputation" />
+    	<splitter class="tree-splitter" />
+    	<treecol id="colContentClusterId" persist="hidden ordinal width" 
+           currentView="unthreaded" flex="2"
+           label="Content Cluster" tooltiptext="Click to sort by Content Cluster Id" />
+    	<splitter class="tree-splitter" />
+    	<treecol id="colPeopleClusterId" persist="hidden ordinal width" 
+           currentView="unthreaded" flex="2"
+           label="People Cluster" tooltiptext="Click to sort by People Cluster Id" />
+        <splitter class="tree-splitter" />
+        <treecol id="colReputationPriority" persist="hidden ordinal width" 
+           currentView="unthreaded" flex="2"
+           label="Importance" tooltiptext="Click to sort by Importance" /> 
+        <splitter class="tree-splitter" />
+        <treecol id="colEmailIntent" persist="hidden ordinal width" 
+           currentView="unthreaded" flex="2"
+           label="Email Intent" tooltiptext="Click to sort by Email intent" />
+        <splitter class="tree-splitter" />
+        <treecol id="colKeywords" persist="hidden ordinal width" 
+           currentView="unthreaded" flex="2"
+           label="Key words" tooltiptext="Click to sort by Key words" />
+        <splitter class="tree-splitter" />
+        <treecol id="colReplyScore" persist="hidden ordinal width" 
+           currentView="unthreaded" flex="2"
+           label="Reply Score" tooltiptext="Click to sort by reply score" />
+        <splitter class="tree-splitter" />
+        <treecol id="colFlagScore" persist="hidden ordinal width" 
+           currentView="unthreaded" flex="2"
+           label="Flag Score" tooltiptext="Click to sort by flag score" />
+        <splitter class="tree-splitter" />
+        <treecol id="colSeeScore" persist="hidden ordinal width" 
+           currentView="unthreaded" flex="2"
+           label="See Score" tooltiptext="Click to sort by see score" />
+    </treecols>
+  </tree>
+  
+  <toolbarpalette id="header-view-toolbar">
+  	<toolbarbutton id="important-button"/>
+  </toolbarpalette>
+  
+  <toolbarbutton id="important-button"
+  label="Important Email"
+  tooltiptext="Important Email!"
+  oncommand="importantEmailHandler.sendRequest();"
+  class="toolbarbutton-1 msgHeaderView-button important-button"
+  />
+
+  <script type="text/javascript" src="demotest.js" /> 
+</overlay>

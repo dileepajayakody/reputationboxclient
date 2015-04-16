@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html
+	xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+<head>
+<title>Reputation Test</title>
+<meta charset="utf8">
+<link rel="stylesheet" href="style.css" type="text/css" media="screen">
+<link rel="shortcut icon" href="chrome://rsstab/skin/icon.png">
+<script src="js/jquery-1.5.min.js" type="text/javascript"
+	charset="utf-8"></script>
+<script type="text/javascript" src="js/jquery.tmpl.js"></script>
+  <script type="application/javascript;version=1.8">
+
+    const Ci = Components.interfaces;
+    const Cc = Components.classes;
+    const Cu = Components.utils;
+    const Cr = Components.results;
+
+    // Don't be subtle.
+    Cu.import("resource://gre/modules/XPCOMUtils.jsm"); // for generateQI
+    Cu.import("resource://gre/modules/PluralForm.jsm");
+    Cu.import("resource://gre/modules/Services.jsm"); // https://developer.mozilla.org/en/JavaScript_code_modules/Services.jsm
+    Cu.import("resource:///modules/mailServices.js"); // bug 629462
+    Cu.import("resource:///modules/StringBundle.js"); // for StringBundle
+    Cu.import("resource:///modules/templateUtils.js"); // for makeFriendlyDateAgo
+    Cu.import("resource:///modules/iteratorUtils.jsm"); // for toXPCOMArray
+    Cu.import("resource:///modules/gloda/utils.js");
+    Cu.import("resource:///modules/gloda/mimemsg.js");
+    Cu.import("resource:///modules/gloda/connotent.js"); // for mimeMsgToContentSnippetAndMeta
+    Cu.import("resource:///modules/gloda/public.js");
+
+    Cu.import("resource://demo/stdlib/msgHdrUtils.js");
+    Cu.import("resource://demo/stdlib/compose.js");
+    Cu.import("resource://demo/stdlib/send.js");
+    Cu.import("resource://demo/stdlib/misc.js");
+    
+    // Adding a messenger lazy getter to the MailServices even though it's not a service
+    XPCOMUtils.defineLazyGetter(MailServices, "messenger", function () {
+      return Cc["@mozilla.org/messenger;1"].createInstance(Ci.nsIMessenger);
+    });
+
+    function openTab(aUrl) {
+      let tabmail = getMail3Pane().document.getElementById("tabmail");
+      tabmail.openTab("chromeTab", { chromePage: aUrl });
+    }
+
+    // Have more fun and read http://mxr.mozilla.org/comm-central/source/mailnews/base/public/nsIMsgAccount.idl
+    $(document).ready(function () {
+      let accounts = [x for each
+        (x in fixIterator(MailServices.accounts.accounts, Ci.nsIMsgAccount))]
+        .filter(function (x) x.incomingServer);
+
+      // http://mxr.mozilla.org/comm-central/source/mailnews/base/public/nsIMsgIncomingServer.idl
+      let server = accounts[0].incomingServer;
+      // http://mxr.mozilla.org/comm-central/source/mailnews/base/public/nsIMsgFolder.idl
+      let folder = server.rootFolder;
+      var str = "[root folder]\n";
+      let inbox;
+      let browseFolders = function (indent, folder) {
+        let isInbox = folder.getFlag(Ci.nsMsgFolderFlags.Inbox);
+        if (isInbox)
+        inbox = folder;
+        
+        //added by dileepa
+        if(folder.prettiestName == "REPUTATIONBOX"){
+        	str += "FOUND REPBOX!!! \n";
+        	  let repubox = folder;
+  			for each (let aMessageHeader in fixIterator(repubox.msgDatabase.EnumerateMessages(), Ci.nsIMsgDBHdr)){
+
+  			  	let messenger = Components.classes["@mozilla.org/messenger;1"]
+                  	        	.createInstance(Components.interfaces.nsIMessenger);
+    			  	let listener = Components.classes["@mozilla.org/network/sync-stream-listener;1"]
+                            		.createInstance(Components.interfaces.nsISyncStreamListener);
+    				let uri = aMessageHeader.folder.getUriForMsg(aMessageHeader);
+    				messenger.messageServiceFromURI(uri).streamMessage(uri, listener, null, null, false, "");
+    				let folder = aMessageHeader.folder;
+    				let messageBody = folder.getMsgTextFromStream(listener.inputStream,
+                                       aMessageHeader.Charset,
+                                       65536,
+                                       32768,
+                                       false,
+                                       true,
+                                       { });
+    				let jsonInput = "'" + messageBody + "'"; 
+    				//array of reputation objects
+    				let reputationArrayObject = JSON.parse(messageBody);
+    				
+    			//done only for the first object, need to iterate this logic	
+  				str += "  the reputation box message body:" + reputationArrayObject.reputation[0].id  
+  				+ " : " + reputationArrayObject.reputation[0].subject + "\n";
+  				
+  				var currentEmailId = reputationArrayObject.reputation[0].id;
+  				var currentEmailSubject = reputationArrayObject.reputation[0].subject;
+				
+  				let query = Gloda.newQuery(Gloda.NOUN_MESSAGE);
+  		        query.subjectMatches(reputationArrayObject.reputation[0].subject);
+  		        let myListener = {
+  		          /* called when new items are returned by the database query or freshly indexed */
+  		          onItemsAdded: function myListener_onItemsAdded(aItems, aCollection) {
+  		          },
+  		          /* called when items that are already in our collection get re-indexed */
+  		          onItemsModified: function myListener_onItemsModified(aItems, aCollection) {
+  		          },
+  		          /* called when items that are in our collection are purged from the system */
+  		          onItemsRemoved: function myListener_onItemsRemoved(aItems, aCollection) {
+  		          },
+  		          /* called when our database query completes */
+  		          onQueryCompleted: function myListener_onQueryCompleted(aCollection) {
+  		        	let items = aCollection.items;
+  		        	
+  		        	alert("items count :  " + items.length);
+  		        	try {
+  						while(msg=items.pop()){
+  							alert(msg.headerMessageID + " : " + msg.subject);
+  							let msgId = "<"+msg.headerMessageID+">";
+  							//if (msgId == currentEmailId){
+  							if (msgId == "<CADTh=Fn5gm-vByTWSzOZT=hJVSoCwbuDA23bJ4HQy2FA08ze5Q@mail.gmail.com>"){	
+  								//if this is the correct email, set the reputation property
+  								let message = msg.folderMessage;
+  								alert("correct message : " + message.subject);
+  								message.setProperty("reputation_score", "test score");
+  								break;
+  							}
+  							
+  							
+  						}
+  					} catch (e) {
+  						
+  					}	
+  		        	  
+  		          }
+  		        };
+  		        let collection = query.getCollection(myListener);
+  		        
+  		        
+  		       	
+  			}
+        }
+        //str += indent + folder.prettiestName + (isInbox ? " *" : "") + "\n";
+        if (folder.hasSubFolders)
+          for each (let folder in fixIterator(folder.subFolders, Ci.nsIMsgFolder))
+            browseFolders(indent + "  ", folder);
+      };
+      
+      
+      browseFolders("  ", folder);
+
+      let i = 0;
+      let messages = [];
+      // http://mxr.mozilla.org/comm-central/source/mailnews/base/public/nsIMsgHdr.idl
+      let lastMsgHdr = null;
+      for each (let msgHdr in fixIterator(inbox.msgDatabase.EnumerateMessages(), Ci.nsIMsgDBHdr)) {
+        if (++i >= 10 && lastMsgHdr != null)
+          break;
+        
+        messages.push({
+          author: msgHdr.mime2DecodedAuthor,
+          subject: msgHdr.mime2DecodedSubject,
+          date: new Date(msgHdr.date/1000),
+        });
+
+        if (msgHdr.flags & Ci.nsMsgMessageFlags.Attachment)
+          lastMsgHdr = msgHdr;
+      }
+
+      let data = {
+        accountName: accounts[0].incomingServer.rootFolder.prettiestName,
+        str: str,
+        messages: messages,
+      };
+      MsgHdrToMimeMessage(lastMsgHdr, this, function (aMsgHdr, aMimeMsg) {
+        data.lastMsgHdr = {
+          received: aMimeMsg.get("received"),
+          attachmentNames: [x.name + " (" +
+          MailServices.messenger.formatFileSize(x.size)+")" for each ([, x] in
+            Iterator(aMimeMsg.allUserAttachments))],
+        };
+        $("#theTemplate").tmpl(data).appendTo($(".main"));
+      }, true, { partsOnDemand: true });
+    });
+  </script>
+</head>
+
+<body>
+
+<script id="theTemplate" type="text/x-jquery-tmpl">
+  <h2>Listing the contents of ${accountName}</h2>
+  <div style="background-color: white; padding: 1em; border-bottom: 1px solid gray;">
+    <pre>
+		${str}
+    </pre>
+  </div>
+</script>
+
+	<div class="wrapper clearfix">
+		<div id="header" class="row">
+			<div class="c4">
+				<h1 style="display: inline-block">ReputationBox testing....</h1>
+			</div>
+			<div class="c2 right">
+				<a href="mailto:dileepajayakody@gmail.com" id="subscribe">email
+					the author</a> – <a
+					href="https://groups.google.com/forum/#!forum/mozilla-labs">feedback</a>
+			</div>
+		</div>
+
+		<div id="feeds" class="main clearfix">
+			<div style="background-color: white; padding: 1em;">&nbsp;</div>
+
+		</div>
+
+	</div>
+
+</body>
+</html>

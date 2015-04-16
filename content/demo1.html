@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+<head>
+  <title>Reputation Box</title>
+  <meta charset="utf8">
+  <link rel="stylesheet" href="style.css" type="text/css" media="screen">
+  <link rel="shortcut icon" href="chrome://rsstab/skin/icon.png">
+  <script src="js/jquery-1.5.min.js" type="text/javascript" charset="utf-8"></script>
+  <script type="text/javascript" src="js/jquery.tmpl.js"></script>
+  <script type="application/javascript;version=1.8">
+
+    const Ci = Components.interfaces;
+    const Cc = Components.classes;
+    const Cu = Components.utils;
+    const Cr = Components.results;
+
+    // Don't be subtle.
+    Cu.import("resource://gre/modules/XPCOMUtils.jsm"); // for generateQI
+    Cu.import("resource://gre/modules/PluralForm.jsm");
+    Cu.import("resource://gre/modules/Services.jsm"); // https://developer.mozilla.org/en/JavaScript_code_modules/Services.jsm
+    Cu.import("resource:///modules/mailServices.js"); // bug 629462
+    Cu.import("resource:///modules/StringBundle.js"); // for StringBundle
+    Cu.import("resource:///modules/templateUtils.js"); // for makeFriendlyDateAgo
+    Cu.import("resource:///modules/iteratorUtils.jsm"); // for toXPCOMArray
+    Cu.import("resource:///modules/gloda/utils.js");
+    Cu.import("resource:///modules/gloda/mimemsg.js");
+    Cu.import("resource:///modules/gloda/connotent.js"); // for mimeMsgToContentSnippetAndMeta
+
+    Cu.import("resource://demo/stdlib/msgHdrUtils.js");
+    Cu.import("resource://demo/stdlib/compose.js");
+    Cu.import("resource://demo/stdlib/send.js");
+    Cu.import("resource://demo/stdlib/misc.js");
+
+    // Adding a messenger lazy getter to the MailServices even though it's not a service
+    XPCOMUtils.defineLazyGetter(MailServices, "messenger", function () {
+      return Cc["@mozilla.org/messenger;1"].createInstance(Ci.nsIMessenger);
+    });
+
+    function openTab(aUrl) {
+      let tabmail = getMail3Pane().document.getElementById("tabmail");
+      tabmail.openTab("chromeTab", { chromePage: aUrl });
+    }
+
+    // Have more fun and read http://mxr.mozilla.org/comm-central/source/mailnews/base/public/nsIMsgAccount.idl
+    $(document).ready(function () {
+      let data = [];
+      for each (let account in fixIterator(MailServices.accounts.accounts, Ci.nsIMsgAccount)) {
+        let info = {
+          server: null,
+          type: null,
+          emails: [],
+          name: null,
+        };
+
+        let server = account.incomingServer;
+        if (server) {
+          info.server = server.prettyName;
+          info.type = server.type;
+        }
+        for each (let id in fixIterator(account.identities, Ci.nsIMsgIdentity)) {
+          // We're only interested in identities that have a real email.
+          if (id.email)
+            info.emails.push(id.email);
+        }
+        data.push(info);
+      }
+      $("#theTemplate").tmpl(data).appendTo($(".main"));
+    });
+  </script>
+</head>
+
+<body>
+
+<script id="theTemplate" type="text/x-jquery-tmpl">
+  <div style="background-color: white; padding: 1em; border-bottom: 1px solid gray;">
+    <h4>${name}</h4>
+    <b>Server:</b> ${server}<br />
+    <b>Type:</b> ${type}<br />
+    <b>Associated email addresses:</b>
+      {{each(i, email) emails}}
+      ${email} 
+      {{/each}}
+      <br />
+  </div>
+</script>
+
+<div class="wrapper clearfix">
+  <div id="header" class="row">
+    <div class="c4">
+      <h1 style="display: inline-block">MozCamp 2011 Demo</h1>
+    </div>
+    <div class="c2 right">
+      <a href="mailto:jonathan.protzenko+mozcamp@gmail.com" id="subscribe">email the author</a>
+      –
+      <a href="https://groups.google.com/forum/#!forum/mozilla-labs">feedback</a>
+    </div>
+  </div>
+  
+  <div id="feeds" class="main clearfix">
+    <div style="background-color: white; padding: 1em; border-bottom: 1px solid gray;">
+      &nbsp;
+    </div>
+     
+  </div>
+  
+  <div id="footer" class="row">
+    <div class="c6">Mozilla — fine software providers since 1998</div>
+  </div>
+  
+</div>
+
+</body>
+</html>

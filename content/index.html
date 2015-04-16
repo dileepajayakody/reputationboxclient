@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+<head>
+  <title>Reputation Box</title>
+  <meta charset="utf8">
+  <link rel="stylesheet" href="style.css" type="text/css" media="screen">
+  <link rel="shortcut icon" href="chrome://rsstab/skin/icon.png">
+  <script type="application/javascript;version=1.8">
+
+    const Ci = Components.interfaces;
+    const Cc = Components.classes;
+    const Cu = Components.utils;
+    const Cr = Components.results;
+
+    // Don't be subtle.
+    Cu.import("resource://gre/modules/XPCOMUtils.jsm"); // for generateQI
+    Cu.import("resource://gre/modules/PluralForm.jsm");
+    Cu.import("resource://gre/modules/Services.jsm"); // https://developer.mozilla.org/en/JavaScript_code_modules/Services.jsm
+    Cu.import("resource:///modules/mailServices.js"); // bug 629462
+    Cu.import("resource:///modules/StringBundle.js"); // for StringBundle
+    Cu.import("resource:///modules/templateUtils.js"); // for makeFriendlyDateAgo
+    Cu.import("resource:///modules/iteratorUtils.jsm"); // for toXPCOMArray
+    Cu.import("resource:///modules/gloda/utils.js");
+    Cu.import("resource:///modules/gloda/mimemsg.js");
+    Cu.import("resource:///modules/gloda/connotent.js"); // for mimeMsgToContentSnippetAndMeta
+
+    Cu.import("resource://demo/stdlib/msgHdrUtils.js");
+    Cu.import("resource://demo/stdlib/compose.js");
+    Cu.import("resource://demo/stdlib/send.js");
+    Cu.import("resource://demo/stdlib/misc.js");
+
+    // Adding a messenger lazy getter to the MailServices even though it's not a service
+    XPCOMUtils.defineLazyGetter(MailServices, "messenger", function () {
+      return Cc["@mozilla.org/messenger;1"].createInstance(Ci.nsIMessenger);
+    });
+
+    function openTab(aUrl) {
+      let tabmail = getMail3Pane().document.getElementById("tabmail");
+      tabmail.openTab("chromeTab", { chromePage: aUrl });
+    }
+  </script>
+</head>
+
+<body>
+
+<div class="wrapper clearfix">
+  <div id="header" class="row">
+    <div class="c4">
+      <h1 style="display: inline-block">Reputation Box</h1>
+    </div>
+    <div class="c2 right">
+      <a href="mailto:jonathan.protzenko+mozcamp@gmail.com" id="subscribe">email the author</a>
+      –
+      <a href="https://groups.google.com/forum/#!forum/mozilla-labs">feedback</a>
+    </div>
+  </div>
+  
+  <div id="feeds" class="clearfix">
+  
+    <div class="listRow row">
+      <div class="listContainer c2 border">
+        <h2>Iterate over all the accounts</h2>
+        <div class="d1">
+          <p>
+            This small demo shows you how to inspect the various account the user
+            has, and how to extract as much info as you can with just a little bit
+            of code.
+          </p>
+          <p>
+            <a href="javascript:" onclick="openTab('chrome://demo/content/demo1.html');">open</a>
+          </p>
+        </div>
+      </div>
+      <div class="listContainer c2 border">
+        <h2>Find the Inbox</h2>
+        <div class="d1">
+          <p>
+            This one will show you how to get the inbox folder for a given
+            accout, how to get a random message from the folder, and how to
+            inspect its contents.
+          </p>
+          <p>
+            <a href="javascript:" onclick="openTab('chrome://demo/content/demo4.html');">open</a>
+          </p>
+        </div>
+      </div>
+      <div class="listContainer c2">
+        <h2>Search messages by subject</h2>
+        <div class="d1">
+          <p>
+            Here, you will find out how to perform a search accross all folders
+            in Thunderbird. You will find messages according to their subject,
+            and then, inspect the thread that contains the message. You will
+            also have the option of displaying the message.
+          </p>
+          <p>
+            <a href="javascript:" onclick="openTab('chrome://demo/content/demo3.html');">open</a>
+          </p>
+        </div>
+      </div>
+    </div>
+     
+  </div>
+  
+  <div id="footer" class="row">
+    <div class="c6">Mozilla — fine software providers since 1998</div>
+  </div>
+  
+</div>
+
+</body>
+</html>
