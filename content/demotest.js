@@ -1,15 +1,15 @@
 var Application = Components.classes["@mozilla.org/steel/application;1"].getService(Components.interfaces.steelIApplication);
 
 //sending msgKey and whether important or unimportant
-
 var importantEmailHandler = {
-		sendRequest : function(){
+		sendImportantRequest : function(){
 		try{
-			alert('going to send a request to RepBox!');
 			//need to get the selected message key and whether its an important email	
 			var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance(Components.interfaces.nsIXMLHttpRequest);
-			//req.setRequestHeader('Content-Type', 'application/json');
-			req.open('POST', "http://localhost:8080/restful/services/EmailService/actions/returnParamString/invoke?string=wooow", false, "sven", "pass");
+			//getting the selected row's msgKey
+			var msgKey = gDBView.keyForFirstSelectedMessage;
+			alert('sending mark Important message key:' + msgKey);
+			req.open('POST', "http://localhost:8080/restful/services/EmailService/actions/markMailImportant/invoke?long="+msgKey, false, "sven", "pass");
 			//req.send('{"string": {"value":"hello"}}');
 			req.send(null);
 			//var status = req.statusText;
@@ -17,9 +17,35 @@ var importantEmailHandler = {
 			//var readyState = req.readyState;			 
 			//Application.console.log('Response for the post request responseText : ' + responseText);
 			 
+			//setting this message as a flagged message;
+			var selectedMsgHdr = gDBView.hdrForFirstSelectedMessage;
+			selectedMsgHdr.setStringProperty("x-flag-score", "0.99");
+			selectedMsgHdr.setStringProperty("x-spam-total-score", "0");
+			
 		} catch (e) {
 			Application.console.log('Error occured in the importantEmailHandler : ' + e);
 		}		
+	},
+	sendSpamRequest : function(){
+		try{
+			//need to get the selected message key and whether its an important email	
+			var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance(Components.interfaces.nsIXMLHttpRequest);
+			//getting the selected row's msgKey
+			var msgKey = gDBView.keyForFirstSelectedMessage;
+			alert('sending mark Spam message key :' + msgKey);
+			req.open('POST', "http://localhost:8080/restful/services/EmailService/actions/markMailSpam/invoke?long="+msgKey, false, "sven", "pass");
+			//req.send('{"string": {"value":"hello"}}');
+			req.send(null);	 
+			var selectedMsgHdr = gDBView.hdrForFirstSelectedMessage;
+			selectedMsgHdr.setStringProperty("x-see-score", "0");
+			selectedMsgHdr.setStringProperty("x-flag-score", "0");
+			selectedMsgHdr.setStringProperty("x-reply-score", "0");
+			selectedMsgHdr.setStringProperty("x-spam-total-score", "0.99");
+			
+			
+		} catch (e) {
+			Application.console.log('Error occured in the importantEmailHandler : ' + e);
+		}
 	}
 }
 
@@ -134,6 +160,7 @@ var peopleRepColumnHandler = {
 	}
 }
 
+	
 var priorityColumnHandler = {
 		getCellText : function(row, col) {
 			// get the message's header so that we can extract the reply to field
@@ -141,7 +168,7 @@ var priorityColumnHandler = {
 	        var hdr = gDBView.db.GetMsgHdrForKey(key);			
 	        var peoplevalue = hdr.getStringProperty("x-people-score");
 	        var contentvalue = hdr.getStringProperty("x-content-score");
-	        
+	       
 	        var pscore = parseFloat(peoplevalue);
 	        var cscore = parseFloat(contentvalue);
 	        var score = (pscore + cscore) / 2;
@@ -189,7 +216,69 @@ var priorityColumnHandler = {
 		getSortLongForRow : function(hdr) {
 			return 0;
 		}
-	}
+}
+
+var recommendedActionColumnHandler = {
+		getCellText : function(row, col) {
+			// get the message's header so that we can extract the reply to field
+			var key = gDBView.getKeyAt(row);
+	        var hdr = gDBView.db.GetMsgHdrForKey(key);			
+	      
+	        var replyValue = hdr.getStringProperty("x-reply-score");
+	        var seeValue = hdr.getStringProperty("x-see-score");
+	        var flagValue = hdr.getStringProperty("x-flag-score");
+	           
+	        var replyScore = parseFloat(replyValue);
+	        var seeScore = parseFloat(seeValue);
+	        var flagScore = parseFloat(flagValue);
+	        
+	        var readString = "";
+	        var replyString = "";
+	        var flagString = "";
+	        
+	        //see logic
+	        if(!isNaN(seeScore)){
+	        	if(seeScore > 0.1){
+	        		readString = "[Read]";
+	        	}
+	        }
+	        
+	        if(!isNaN(replyScore)){
+	      	    if(replyScore > 0.1){
+	        		replyString = "[Reply]";
+	        	}	
+	        }
+	        
+	        if(!isNaN(flagScore)){
+	        	if(flagScore > 0.1){
+	        		flagString = "[Important]";
+	        	}
+	        }
+	        var actionString = readString + replyString + flagString;
+	        //var actionString = replyScore +" : " + seeScore + " : " + flagScore;
+	        return actionString;
+		},
+		
+		isString : function() {
+			return true;
+		},
+		
+		getImageSrc : function(row, col) {
+			return null;
+		},
+		
+		getSortStringForRow : function(hdr) {
+		        return "";
+		},
+		getCellProperties : function(row, col, props) {
+		},
+		getRowProperties : function(row, props) {
+		},
+		getSortLongForRow : function(hdr) {
+			return 0;
+		}
+}
+
 
 var contentClusterColumnHandler = {
 		getCellText : function(row, col) {
@@ -360,6 +449,7 @@ var flagScoreColumnHandler = {
 		}
 	}
 
+
 var seeScoreColumnHandler = {
 		getCellText : function(row, col) {
 			var key = gDBView.getKeyAt(row);
@@ -389,6 +479,37 @@ var seeScoreColumnHandler = {
 	}
 
 
+//spam total score
+var spamScoreColumnHandler = {
+		getCellText : function(row, col) {
+			var key = gDBView.getKeyAt(row);
+            var hdr = gDBView.db.GetMsgHdrForKey(key);			
+            var colvalue = hdr.getStringProperty("x-spam-total-score");
+            return colvalue;
+		},
+		getSortStringForRow : function(hdr) {
+			var colvalue = hdr.getStringProperty("x-spam-total-score");
+			return colvalue;
+			//return "";
+		},
+		isString : function() {
+			return true;
+		},
+
+		getCellProperties : function(row, col, props) {
+		},
+		getRowProperties : function(row, props) {
+		},
+		getImageSrc : function(row, col) {
+			return null;
+		},
+		getSortLongForRow : function(hdr) {
+			return 0;
+		}
+	}
+
+
+
 
 var CreateDbObserver = {
   // Components.interfaces.nsIObserver
@@ -410,6 +531,9 @@ function addCustomColumnHandler() {
 	   gDBView.addColumnHandler("colReplyScore", replyScoreColumnHandler);
 	   gDBView.addColumnHandler("colFlagScore", flagScoreColumnHandler);
 	   gDBView.addColumnHandler("colSeeScore", seeScoreColumnHandler);
+	   gDBView.addColumnHandler("spamScore", spamScoreColumnHandler);
+	   gDBView.addColumnHandler("recommendedAction", recommendedActionColumnHandler);
+	   
 }
 
 var count = 0;
@@ -581,6 +705,8 @@ function processReputationMessages(){
 				    		dbMsgHdr.setStringProperty("x-spam-content-score", spamContentScore);
 				    		dbMsgHdr.setStringProperty("x-spam-people-score", spamPeopleScore);
 				    		dbMsgHdr.setStringProperty("x-spam-keyword-score", spamKeywordScore);
+				    		let spamTotalScore = parseFloat(spamContentScore) + parseFloat(spamPeopleScore) + parseFloat(spamKeywordScore);
+				    		dbMsgHdr.setStringProperty("x-spam-total-score", spamTotalScore);
 				    		
 				    		
 				    		
@@ -591,6 +717,9 @@ function processReputationMessages(){
 				    				+" people score: " + dbMsgHdr.getStringProperty("x-people-score")
 				    				+" email intent: " + dbMsgHdr.getStringProperty("x-email-intent")
 				    				+" nlp keywords : " + dbMsgHdr.getStringProperty("x-nlp-keywords")
+				    				+" spam content scores : " + dbMsgHdr.getStringProperty("x-spam-content-score")
+				    				+" spam people scores : " + dbMsgHdr.getStringProperty("x-spam-people-score")
+				    				+" spam keyword scores : " + dbMsgHdr.getStringProperty("x-spam-keyword-score")
 				    				);
 				    	/*	repboxsqlite.dbConnection.executeSimpleSQL("INSERT INTO reputation VALUES ('" + messageID + "' , '"
 				    				+ contentscore + "' , '" + peoplescore + "' , '" + contentclusterid + "' , '" + peopleclusterid +"')");*/
@@ -615,7 +744,7 @@ function processReputationMessages(){
 		    	}
 		    }
 		   
-		   //remove the messages here
+		   //remove the processed reputation messages here
 		   try{
 			   if(msgFolder != null){
 				   msgFolder.deleteMessages(messagesToDelete, msgWindow, true, true, null, true); 

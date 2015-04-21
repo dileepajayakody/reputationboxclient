@@ -24,6 +24,7 @@
            currentView="unthreaded" flex="2"
            label="Importance" tooltiptext="Click to sort by Importance" /> 
         <splitter class="tree-splitter" />
+        <!--new columns for email intent, keywords, replyscore, flagscore, seescore-->
         <treecol id="colEmailIntent" persist="hidden ordinal width" 
            currentView="unthreaded" flex="2"
            label="Email Intent" tooltiptext="Click to sort by Email intent" />
@@ -43,6 +44,12 @@
         <treecol id="colSeeScore" persist="hidden ordinal width" 
            currentView="unthreaded" flex="2"
            label="See Score" tooltiptext="Click to sort by see score" />
+        <treecol id="spamScore" persist="hidden ordinal width" 
+           currentView="unthreaded" flex="2"
+           label="Spam Score" tooltiptext="Click to sort by spam score" />
+        <treecol id="recommendedAction" persist="hidden ordinal width" 
+           currentView="unthreaded" flex="2"
+           label="Recommended Action" tooltiptext="Click to sort by recommended action" />
     </treecols>
   </tree>
   
@@ -51,9 +58,20 @@
   </toolbarpalette>
   
   <toolbarbutton id="important-button"
-  label="Important Email"
-  tooltiptext="Important Email!"
-  oncommand="importantEmailHandler.sendRequest();"
+  label="Mark as Important"
+  tooltiptext="Mark as Important Email"
+  oncommand="importantEmailHandler.sendImportantRequest();"
+  class="toolbarbutton-1 msgHeaderView-button important-button"
+  />
+  
+  <toolbarpalette id="header-view-toolbar">
+  	<toolbarbutton id="spam-button"/>
+  </toolbarpalette>
+  
+  <toolbarbutton id="spam-button"
+  label="Mark as Unimportant"
+  tooltiptext="Mark as Unimportant Email"
+  oncommand="importantEmailHandler.sendSpamRequest();"
   class="toolbarbutton-1 msgHeaderView-button important-button"
   />
 
