@@ -36,14 +36,91 @@
    -
    - ***** END LICENSE BLOCK ***** -->
 <overlay id="messengerWindow" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  <script type="application/x-javascript" src="overlay.js" />
+  <script type="application/x-javascript" src="demotest.js" />
   <toolbarpalette id="MailToolbarPalette">
     <toolbarbutton id="demo-button"
       class="demo-button toolbarbutton-1"
       label="Demo"
       type="button"
       oncommand="Demo.load();"
-      />
+      /> 
+      <toolbarbutton id="button-direct-readval"
+                    type="menu-button"
+                    class="toolbarbutton-1"
+                    label="Direct Mail Read Score"
+                    tooltiptext="Change Read Score Threshold For Direct Emails"
+                    oncommand=""
+                    >
+       <menupopup id="dr-v1">
+        <menuitem label="0.1" oncommand="ValueHandler.changeDirectReadVal(this.value)" value="0.1"/>
+		<menuitem label="0.2" oncommand="ValueHandler.changeDirectReadVal(this.value)" value="0.2"/>
+		<menuitem label="0.3" oncommand="ValueHandler.changeDirectReadVal(this.value)" value="0.3"/>
+		<menuitem label="0.4" oncommand="ValueHandler.changeDirectReadVal(this.value)" value="0.4"/>
+		<menuitem label="0.5" oncommand="ValueHandler.changeDirectReadVal(this.value)" value="0.5"/>
+		<menuitem label="0.6" oncommand="ValueHandler.changeDirectReadVal(this.value)" value="0.6"/>
+		<menuitem label="0.7" oncommand="ValueHandler.changeDirectReadVal(this.value)" value="0.7"/>
+		<menuitem label="0.8" oncommand="ValueHandler.changeDirectReadVal(this.value)" value="0.8"/>
+		<menuitem label="0.9" oncommand="ValueHandler.changeDirectReadVal(this.value)" value="0.9"/>
+       </menupopup>
+     </toolbarbutton>
+     <toolbarbutton id="button-list-readval"
+                    type="menu-button"
+                    class="toolbarbutton-1"
+                    label="List Mail Read Score"
+                    tooltiptext="Change Read Score Threshold For List Emails"
+                    oncommand=""
+                    >
+       <menupopup id="lr-v1">
+        <menuitem label="0.1" oncommand="ValueHandler.changeListReadVal(this.value)" value="0.1"/>
+		<menuitem label="0.2" oncommand="ValueHandler.changeListReadVal(this.value)" value="0.2"/>
+		<menuitem label="0.3" oncommand="ValueHandler.changeListReadVal(this.value)" value="0.3"/>
+		<menuitem label="0.4" oncommand="ValueHandler.changeListReadVal(this.value)" value="0.4"/>
+		<menuitem label="0.5" oncommand="ValueHandler.changeListReadVal(this.value)" value="0.5"/>
+		<menuitem label="0.6" oncommand="ValueHandler.changeListReadVal(this.value)" value="0.6"/>
+		<menuitem label="0.7" oncommand="ValueHandler.changeListReadVal(this.value)" value="0.7"/>
+		<menuitem label="0.8" oncommand="ValueHandler.changeListReadVal(this.value)" value="0.8"/>
+		<menuitem label="0.9" oncommand="ValueHandler.changeListReadVal(this.value)" value="0.9"/>
+       </menupopup>
+     </toolbarbutton>
+     <toolbarbutton id="button-direct-replyval"
+                    type="menu-button"
+                    class="toolbarbutton-1"
+                    label="Direct Mail Reply Score"
+                    tooltiptext="Change Reply Score For Direct Emails"
+                    oncommand=""
+                    >
+       <menupopup id="drep-v1">
+        <menuitem label="0.1" oncommand="ValueHandler.changeDirectReplyVal(this.value)" value="0.1"/>
+		<menuitem label="0.2" oncommand="ValueHandler.changeDirectReplyVal(this.value)" value="0.2"/>
+		<menuitem label="0.3" oncommand="ValueHandler.changeDirectReplyVal(this.value)" value="0.3"/>
+		<menuitem label="0.4" oncommand="ValueHandler.changeDirectReplyVal(this.value)" value="0.4"/>
+		<menuitem label="0.5" oncommand="ValueHandler.changeDirectReplyVal(this.value)" value="0.5"/>
+		<menuitem label="0.6" oncommand="ValueHandler.changeDirectReplyVal(this.value)" value="0.6"/>
+		<menuitem label="0.7" oncommand="ValueHandler.changeDirectReplyVal(this.value)" value="0.7"/>
+		<menuitem label="0.8" oncommand="ValueHandler.changeDirectReplyVal(this.value)" value="0.8"/>
+		<menuitem label="0.9" oncommand="ValueHandler.changeDirectReplyVal(this.value)" value="0.9"/>
+       </menupopup>
+     </toolbarbutton>
+     <toolbarbutton id="button-list-replyval"
+                    type="menu-button"
+                    class="toolbarbutton-1"
+                    label="Direct Mail Reply Score"
+                    tooltiptext="Change Reply Score For Direct Emails"
+                    oncommand=""
+                    >
+       <menupopup id="lrep-v1">
+        <menuitem label="0.1" oncommand="ValueHandler.changeListReplyVal(this.value)" value="0.1"/>
+		<menuitem label="0.2" oncommand="ValueHandler.changeListReplyVal(this.value)" value="0.2"/>
+		<menuitem label="0.3" oncommand="ValueHandler.changeListReplyVal(this.value)" value="0.3"/>
+		<menuitem label="0.4" oncommand="ValueHandler.changeListReplyVal(this.value)" value="0.4"/>
+		<menuitem label="0.5" oncommand="ValueHandler.changeListReplyVal(this.value)" value="0.5"/>
+		<menuitem label="0.6" oncommand="ValueHandler.changeListReplyVal(this.value)" value="0.6"/>
+		<menuitem label="0.7" oncommand="ValueHandler.changeListReplyVal(this.value)" value="0.7"/>
+		<menuitem label="0.8" oncommand="ValueHandler.changeListReplyVal(this.value)" value="0.8"/>
+		<menuitem label="0.9" oncommand="ValueHandler.changeListReplyVal(this.value)" value="0.9"/>
+       </menupopup>
+     </toolbarbutton>
+    <scale id="slider" width="200" increment="0.1" movetoclick="true" orient="horizontal" min="0" max="1" value="0.1"/>
   </toolbarpalette>
-    
+  
 </overlay>
